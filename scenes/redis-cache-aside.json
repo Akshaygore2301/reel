@@ -1,0 +1,47 @@
+{
+  "slug": "redis-cache-aside",
+  "handle": "@builddebugship",
+  "header": {
+    "stat": { "label": "FIRST BYTE", "slow": "240ms", "fast": "2ms" },
+    "title": { "lead": "Cache", "accent": "Aside" },
+    "subtitle": "why Redis answers before Postgres wakes up"
+  },
+  "stage": {
+    "kind": "splitCompare",
+    "source": { "label": "THE QUERY", "sub": "asks for one user row" },
+    "buffer": {
+      "label": "THE SCAN",
+      "sub": "reads every row to find one",
+      "subOpen": "finished — all at once"
+    },
+    "slow": {
+      "title": "COLD READ",
+      "sub": "every request hits the disk",
+      "waitLabel": "still scanning"
+    },
+    "fast": { "title": "CACHE HIT", "sub": "served straight from memory" },
+    "counterLabel": "ROWS SERVED",
+    "payloads": [
+      "the very same user row was read straight back off the disk on every single request even though not one byte of it had actually changed since nine this morning",
+      "redis keeps that one row sitting right there in memory so the second request never even reaches the database and comes back before the disk has been asked at all"
+    ],
+    "stat": {
+      "firstLabel": "FIRST BYTE",
+      "firstBefore": "240ms",
+      "firstAfter": "2ms",
+      "lastLabel": "COLD MISS",
+      "lastText": "240ms = 240ms"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 10 }, "text": "why is the same query slow every time?" },
+    { "at": { "cycle": 0, "on": "dump" }, "text": "the disk re-read a row that never changed." },
+    { "at": { "cycle": 1, "token": 6 }, "text": "redis answers from memory, not from disk." },
+    { "at": { "cycle": 1, "token": 20 }, "text": "the first request still pays full price." }
+  ],
+  "credits": {
+    "lead": "CACHE ASIDE",
+    "tail": "= read cache, miss, fill, return",
+    "tags": ["REDIS", "MEMCACHED", "VALKEY", "DRAGONFLY"]
+  }
+}

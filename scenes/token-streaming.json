@@ -1,0 +1,47 @@
+{
+  "slug": "token-streaming",
+  "handle": "@builddebugship",
+  "header": {
+    "stat": { "label": "FIRST WORD", "slow": "3.0s", "fast": "0.1s" },
+    "title": { "lead": "Token", "accent": "Streaming" },
+    "subtitle": "why AI answers arrive word by word"
+  },
+  "stage": {
+    "kind": "splitCompare",
+    "source": { "label": "THE MODEL", "sub": "writes one word at a time" },
+    "buffer": {
+      "label": "THE BUFFER",
+      "sub": "holds every finished word",
+      "subOpen": "opened — all at once"
+    },
+    "slow": {
+      "title": "NO STREAMING",
+      "sub": "the reply waits until it's done",
+      "waitLabel": "still waiting"
+    },
+    "fast": { "title": "STREAMING", "sub": "each word shows as it's made" },
+    "counterLabel": "YOU'VE READ",
+    "payloads": [
+      "the model wrote this whole reply three seconds ago but the buffer held every token back until the very last word had been written down and marked as fully done",
+      "streaming does not change how fast the model thinks it only changes when you are allowed to start reading the words it has already finished writing down just for you"
+    ],
+    "stat": {
+      "firstLabel": "FIRST WORD",
+      "firstBefore": "3.0s",
+      "firstAfter": "0.1s",
+      "lastLabel": "LAST WORD",
+      "lastText": "3.0s = 3.0s"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 10 }, "text": "why does AI type word by word?" },
+    { "at": { "cycle": 0, "on": "dump" }, "text": "finished words were sitting in a buffer." },
+    { "at": { "cycle": 1, "token": 6 }, "text": "streaming sends each word the moment it exists." },
+    { "at": { "cycle": 1, "token": 20 }, "text": "you start reading at word one, not thirty." }
+  ],
+  "credits": {
+    "lead": "STREAMING",
+    "tail": "= send each word as it's born",
+    "tags": ["OPENAI", "ANTHROPIC", "GEMINI", "VERCEL"]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "reel-engine",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "studio": "remotion studio src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "validate": "node --experimental-strip-types scripts/validate.mjs",
+    "audio": "node --experimental-strip-types scripts/build-audio.mjs",
+    "verify": "node --experimental-strip-types scripts/verify-sync.mjs",
+    "render": "node --experimental-strip-types scripts/render.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "private": "true",
+  "type": "module",
+  "dependencies": {
+    "@remotion/cli": "^4.0.513",
+    "@remotion/google-fonts": "^4.0.513",
+    "@remotion/zod-types": "^4.0.513",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "remotion": "^4.0.513",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "typescript": "^5.9.3"
+  }
+}
