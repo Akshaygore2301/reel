@@ -1,4 +1,5 @@
 import React from 'react';
+import { CHANNEL } from '../brand/channel';
 import { FONT } from '../brand/fonts';
 import { COLOR, LAYOUT, MONO_FEATURES, TRACK, TYPE } from '../brand/tokens';
 import type { Scene } from '../schema/scene';
@@ -35,7 +36,7 @@ export const Header: React.FC<{ scene: Scene }> = ({ scene }) => {
           letterSpacing: 0.2,
         }}
       >
-        {scene.handle}
+        {scene.handle ?? CHANNEL.handle}
       </div>
 
       <div

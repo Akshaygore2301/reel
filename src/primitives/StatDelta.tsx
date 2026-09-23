@@ -1,8 +1,7 @@
 import React from 'react';
 import { FONT } from '../brand/fonts';
 import { COLOR, MONO_FEATURES, TRACK, fitMono, withAlpha } from '../brand/tokens';
-import { STAT } from './geometry';
-import type { SplitCompare } from '../schema/scene';
+import type { Stat } from '../schema/fields';
 
 /**
  * The delta panel wedged between the two screens, revealed on the payoff cycle.
@@ -12,10 +11,12 @@ import type { SplitCompare } from '../schema/scene';
  * word still arrives at the same moment either way, and saying so is what makes
  * the rest credible.
  */
-export const StatDelta: React.FC<{ stat: SplitCompare['stat']; reveal: number }> = ({
-  stat,
-  reveal,
-}) => {
+export const StatDelta: React.FC<{
+  stat: Stat;
+  reveal: number;
+  /** Where the archetype puts it. `w` is narrow by design; see below. */
+  box: { x: number; topY: number; w: number };
+}> = ({ stat, reveal, box }) => {
   /*
    * Only ~76px wide, wedged between the two screens. The labels have to fit on
    * one line at that width, so tracking is dialled back from the usual TRACK.wide
@@ -23,7 +24,7 @@ export const StatDelta: React.FC<{ stat: SplitCompare['stat']; reveal: number }>
    * and a wrapped "FIRST WORD" reads as a mistake.
    */
   // Usable width inside the panel, minus a little breathing room each side.
-  const W = STAT.w - 6;
+  const W = box.w - 6;
   const labelTrack = TRACK.wide - 1.2;
 
   const label = (text: string) =>
@@ -41,9 +42,9 @@ export const StatDelta: React.FC<{ stat: SplitCompare['stat']; reveal: number }>
     <div
       style={{
         position: 'absolute',
-        left: STAT.x,
-        top: STAT.topY,
-        width: STAT.w,
+        left: box.x,
+        top: box.topY,
+        width: box.w,
         textAlign: 'center',
         opacity: reveal,
         transform: `translateY(${(1 - reveal) * 8}px)`,

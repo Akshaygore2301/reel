@@ -1,7 +1,10 @@
 /**
  * Proves the audio lands where the timeline says it should.
  *
- * Run: node --experimental-strip-types scripts/verify-sync.mjs [file.wav]
+ * Run: node --experimental-strip-types scripts/verify-sync.mjs <slug>
+ *      node --experimental-strip-types scripts/verify-sync.mjs <file.wav> --describe
+ *
+ * A slug checks public/audio/<slug>.wav against that scene's archetype timeline.
  *
  * Method: 20ms RMS envelope, onset = a bin that rises past a threshold from below.
  * Each detected onset must match a beat within one frame (33ms at 30fps). This is
@@ -11,13 +14,13 @@
  * Exits non-zero on failure so it can gate a render.
  */
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
-import { buildBeats, DURATION_IN_FRAMES, FPS } from '../src/timeline/beats.ts';
+import { FPS } from '../src/timeline/core.ts';
+import { timelineFor } from '../src/archetypes/registry.ts';
+import { validateScene } from '../src/schema/scene.ts';
 import { ATTACK_SECONDS } from '../src/audio/synth.ts';
-
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+import { ROOT, selectScenes } from './lib/scenes.mjs';
 const BIN = 0.02;
 const TOLERANCE_FRAMES = 1;
 
@@ -102,9 +105,21 @@ function onsets(env, peak) {
  * match) to read off its tick grid, loop period and peak placement.
  */
 const describeOnly = process.argv.includes('--describe');
-const target =
-  process.argv.slice(2).find((a) => !a.startsWith('--')) ??
-  join(ROOT, 'public', 'audio', 'token-streaming.wav');
+const arg = process.argv.slice(2).find((a) => !a.startsWith('--'));
+if (!arg) {
+  console.error('  usage: verify-sync.mjs <slug> | <file.wav> --describe');
+  process.exit(1);
+}
+
+// A bare .wav with --describe needs no scene: it may be a reference reel's audio.
+// Anything else names a scene, directly or by its public/audio/<slug>.wav path.
+const isWav = arg.endsWith('.wav');
+const slug = isWav ? arg.split('/').pop().replace(/\.wav$/, '') : arg;
+const timeline =
+  describeOnly && isWav
+    ? null
+    : timelineFor(validateScene(selectScenes([slug])[0].raw).stage);
+const target = isWav ? arg : join(ROOT, 'public', 'audio', `${slug}.wav`);
 const { mono, sampleRate } = readWav(target);
 const env = envelope(mono, sampleRate);
 const peak = env.reduce((m, e) => Math.max(m, e.rms), 0);
@@ -114,11 +129,16 @@ const frameSec = 1 / FPS;
 const tolerance = TOLERANCE_FRAMES * frameSec;
 
 // Beats that should be audible inside the render window.
-const beats = buildBeats().filter((b) => b.frame >= 0 && b.frame < DURATION_IN_FRAMES);
+const beats = timeline
+  ? timeline.buildBeats().filter((b) => b.frame >= 0 && b.frame < timeline.durationInFrames)
+  : [];
 
 console.log(`\n  file      ${target.replace(ROOT + '/', '')}`);
 console.log(`  duration  ${(mono.length / sampleRate).toFixed(3)}s @ ${sampleRate}Hz`);
-console.log(`  onsets    ${detected.length} detected / ${beats.length} beats expected`);
+console.log(
+  `  onsets    ${detected.length} detected` +
+    (timeline ? ` / ${beats.length} beats expected` : ''),
+);
 console.log(`  tolerance ${(tolerance * 1000).toFixed(0)}ms (${TOLERANCE_FRAMES} frame)\n`);
 
 if (describeOnly) {

@@ -13,7 +13,7 @@ export const Counter: React.FC<{
   cx: number;
   y: number;
   label: string;
-  value: number;
+  value: number | string;
   color: string;
   /** Brief flash when the value changes. 0..1. */
   flash?: number;

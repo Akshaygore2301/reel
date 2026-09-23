@@ -1,0 +1,40 @@
+{
+  "slug": "connection-leak",
+  "header": {
+    "stat": { "label": "REQUESTS SERVED", "slow": "6 of 10", "fast": "10 of 10" },
+    "title": { "lead": "Connection", "accent": "Leaks" },
+    "subtitle": "why your app hangs with the database idle"
+  },
+  "stage": {
+    "kind": "lifecycle",
+    "pool": { "label": "CONNECTION POOL", "sub": "6 connections, shared" },
+    "freeLabel": "FREE CONNS",
+    "waitLabel": "WAITING",
+    "states": [
+      { "name": "CHECKED OUT", "detail": "handed to a request" },
+      { "name": "QUERYING", "detail": "talking to the db" },
+      { "name": "DONE", "detail": "read, but never closed" },
+      { "name": "CLOSED", "detail": "released to the pool" }
+    ],
+    "stuckState": 2,
+    "fixLabel": "defer close()",
+    "stat": {
+      "firstLabel": "SERVED",
+      "firstBefore": "6 of 10",
+      "firstAfter": "10 of 10",
+      "lastLabel": "POOL SIZE",
+      "lastText": "6 = 6"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 3 }, "text": "each request borrows a connection." },
+    { "at": { "cycle": 0, "on": "exhausted" }, "text": "none came back. the pool is empty." },
+    { "at": { "cycle": 1, "on": "release" }, "text": "close it when you're done, even on error." },
+    { "at": { "cycle": 1, "on": "exhausted" }, "text": "same pool, same traffic, nobody waits." }
+  ],
+  "credits": {
+    "lead": "RESOURCE LEAK",
+    "tail": "= acquired, never released",
+    "tags": ["HIKARICP", "PGBOUNCER", "SQLALCHEMY", "DATABASE/SQL"]
+  }
+}

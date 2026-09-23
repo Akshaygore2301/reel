@@ -1,0 +1,38 @@
+{
+  "slug": "cdn-cache",
+  "header": {
+    "stat": { "label": "PAGE LOAD", "slow": "322ms", "fast": "22ms" },
+    "title": { "lead": "CDN", "accent": "Caching" },
+    "subtitle": "why the second visitor gets it instantly"
+  },
+  "stage": {
+    "kind": "layers",
+    "unitLabel": "LAYERS ASKED",
+    "clockLabel": "LATENCY",
+    "layers": [
+      { "name": "BROWSER", "detail": "the user's own disk", "ms": 2 },
+      { "name": "CDN EDGE", "detail": "a server near the user", "ms": 20 },
+      { "name": "APP SERVER", "detail": "renders the page", "ms": 100 },
+      { "name": "DATABASE", "detail": "far away, does the work", "ms": 200 }
+    ],
+    "hitLayer": 1,
+    "stat": {
+      "firstLabel": "PAGE LOAD",
+      "firstBefore": "322ms",
+      "firstAfter": "22ms",
+      "lastLabel": "FIRST VISIT",
+      "lastText": "still pays full"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 5 }, "text": "why is the first page load so slow?" },
+    { "at": { "cycle": 0, "on": "found" }, "text": "nothing had it, so it went all the way down." },
+    { "at": { "cycle": 1, "token": 5 }, "text": "the edge kept a copy on the way back." },
+    { "at": { "cycle": 1, "on": "done" }, "text": "now it never touches your servers." }
+  ],
+  "credits": {
+    "lead": "EDGE CACHING",
+    "tail": "= answer from the closest layer",
+    "tags": ["CLOUDFLARE", "FASTLY", "CLOUDFRONT", "AKAMAI"]
+  }
+}

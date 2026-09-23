@@ -3,13 +3,14 @@ import { Composition } from 'remotion';
 import { Reel } from './Reel';
 import { SCENES } from './scenes';
 import { VIDEO } from './brand/tokens';
-import { DURATION_IN_FRAMES, FPS } from './timeline/beats';
+import { timelineFor } from './archetypes/registry';
+import { FPS } from './timeline/core';
 
 /**
  * One composition per scenes/*.json, id = slug.
  *
- * Duration and fps come from the timeline module, not from here — a composition
- * whose length disagreed with the beat list would truncate the payoff cycle.
+ * Duration comes from the scene's archetype timeline, not from here. A composition
+ * whose length disagreed with its beat list would truncate the payoff cycle.
  */
 export const RemotionRoot: React.FC = () => (
   <>
@@ -18,7 +19,7 @@ export const RemotionRoot: React.FC = () => (
         key={scene.slug}
         id={scene.slug}
         component={Reel}
-        durationInFrames={DURATION_IN_FRAMES}
+        durationInFrames={timelineFor(scene.stage).durationInFrames}
         fps={FPS}
         width={VIDEO.width}
         height={VIDEO.height}

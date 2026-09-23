@@ -1,6 +1,5 @@
 {
   "slug": "redis-cache-aside",
-  "handle": "@builddebugship",
   "header": {
     "stat": { "label": "FIRST BYTE", "slow": "240ms", "fast": "2ms" },
     "title": { "lead": "Cache", "accent": "Aside" },

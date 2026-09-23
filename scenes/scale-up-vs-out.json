@@ -1,0 +1,45 @@
+{
+  "slug": "scale-up-vs-out",
+  "header": {
+    "stat": { "label": "DOWNTIME", "slow": "~5 min", "fast": "0s" },
+    "title": { "lead": "Scale Up vs", "accent": "Scale Out" },
+    "subtitle": "a bigger server, or one more server?"
+  },
+  "stage": {
+    "kind": "scaleOut",
+    "source": { "label": "THE TRAFFIC", "sub": "one request every 100ms" },
+    "counterLabel": "REQUESTS DONE",
+    "up": {
+      "title": "SCALE UP",
+      "sub": "stop it, resize it, restart it",
+      "unit": "4 vCPU",
+      "unitAfter": "16 vCPU",
+      "offlineLabel": "resizing"
+    },
+    "out": {
+      "title": "SCALE OUT",
+      "sub": "add a box, traffic keeps flowing",
+      "unit": "4 vCPU",
+      "router": "BALANCER",
+      "spawnLabel": "+1 NODE"
+    },
+    "stat": {
+      "firstLabel": "DOWNTIME",
+      "firstBefore": "~5 min",
+      "firstAfter": "0s",
+      "lastLabel": "PER REQUEST",
+      "lastText": "40ms = 40ms"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 5 }, "text": "your one server is full. now what?" },
+    { "at": { "cycle": 0, "on": "offline" }, "text": "scaling up means taking it offline." },
+    { "at": { "cycle": 1, "on": "spawn" }, "text": "scaling out adds a box behind the balancer." },
+    { "at": { "cycle": 1, "on": "online" }, "text": "no request ever waits for a reboot." }
+  ],
+  "credits": {
+    "lead": "SCALE OUT",
+    "tail": "= add machines, not bigger ones",
+    "tags": ["KUBERNETES", "AWS ASG", "NGINX", "CASSANDRA"]
+  }
+}

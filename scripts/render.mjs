@@ -9,27 +9,15 @@
  * stills and drifts in motion.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+import { ROOT, selectScenes } from './lib/scenes.mjs';
+
 const run = (cmd, args) =>
   execFileSync(cmd, args, { cwd: ROOT, stdio: 'inherit', env: process.env });
 
-const allSlugs = readdirSync(join(ROOT, 'scenes'))
-  .filter((f) => f.endsWith('.json'))
-  .map((f) => JSON.parse(readFileSync(join(ROOT, 'scenes', f), 'utf8')).slug);
-
-const requested = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-const slugs = requested.length > 0 ? requested : allSlugs;
-
-for (const slug of slugs) {
-  if (!allSlugs.includes(slug)) {
-    console.error(`No scenes/*.json declares slug "${slug}". Have: ${allSlugs.join(', ')}`);
-    process.exit(1);
-  }
-}
+const slugs = selectScenes().map((s) => s.raw.slug);
 
 console.log(`\n[1/4] validating ${slugs.length} scene(s)`);
 run('node', ['--experimental-strip-types', 'scripts/validate.mjs', ...slugs]);
@@ -39,11 +27,7 @@ run('node', ['--experimental-strip-types', 'scripts/build-audio.mjs', ...slugs])
 
 console.log(`\n[3/4] verifying audio-visual sync`);
 for (const slug of slugs) {
-  run('node', [
-    '--experimental-strip-types',
-    'scripts/verify-sync.mjs',
-    join('public', 'audio', `${slug}.wav`),
-  ]);
+  run('node', ['--experimental-strip-types', 'scripts/verify-sync.mjs', slug]);
 }
 
 console.log(`\n[4/4] rendering`);

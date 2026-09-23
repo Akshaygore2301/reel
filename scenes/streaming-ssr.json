@@ -1,0 +1,46 @@
+{
+  "slug": "streaming-ssr",
+  "header": {
+    "stat": { "label": "FIRST BYTE", "slow": "3.0s", "fast": "0.1s" },
+    "title": { "lead": "Streaming", "accent": "SSR" },
+    "subtitle": "why the page shell shows before the data"
+  },
+  "stage": {
+    "kind": "splitCompare",
+    "source": { "label": "THE SERVER", "sub": "renders the page top to bottom" },
+    "buffer": {
+      "label": "THE HTML STRING",
+      "sub": "holds the page until it's done",
+      "subOpen": "sent, all in one go"
+    },
+    "slow": {
+      "title": "CLASSIC SSR",
+      "sub": "waits for the slowest query",
+      "waitLabel": "blank screen"
+    },
+    "fast": { "title": "STREAMING SSR", "sub": "flushes each chunk when ready" },
+    "counterLabel": "YOU'VE SEEN",
+    "payloads": [
+      "the header and menu were ready in a few milliseconds but the server kept the whole page back until the slow reviews query finally came back from the busy database",
+      "streaming sends the shell and menu the moment they render and a placeholder holds the spot where the reviews will slot in later once their slow query is finally done"
+    ],
+    "stat": {
+      "firstLabel": "FIRST BYTE",
+      "firstBefore": "3.0s",
+      "firstAfter": "0.1s",
+      "lastLabel": "SLOWEST QUERY",
+      "lastText": "3.0s = 3.0s"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 10 }, "text": "why is this page blank for three seconds?" },
+    { "at": { "cycle": 0, "on": "dump" }, "text": "the server waited on one slow query." },
+    { "at": { "cycle": 1, "token": 6 }, "text": "streaming sends the page in chunks." },
+    { "at": { "cycle": 1, "token": 20 }, "text": "you read the page while the slow part loads." }
+  ],
+  "credits": {
+    "lead": "STREAMING SSR",
+    "tail": "= flush html as each part is ready",
+    "tags": ["NEXT.JS", "REMIX", "REACT 18", "ASTRO"]
+  }
+}

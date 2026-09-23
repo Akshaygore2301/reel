@@ -1,27 +1,30 @@
 /**
- * Builds public/audio/<slug>.wav from the shared timeline.
+ * Builds public/audio/<slug>.wav from each scene's archetype timeline.
  *
  * Run: node --experimental-strip-types scripts/build-audio.mjs [slug ...]
  *
- * This imports the SAME timeline/beats.ts the React components read. There is no
- * second list of timings anywhere — retime the cycle in beats.ts and both the
- * picture and this WAV move together.
+ * This imports the SAME timeline module the archetype's React component reads.
+ * There is no second list of timings anywhere: retime an archetype and both the
+ * picture and this WAV move together. Each scene gets its own track: some
+ * archetypes' rhythms depend on content (a pipeline's handoffs land where its
+ * stage weights put them), so two scenes of one archetype need not match.
  */
-import { mkdirSync, writeFileSync, readdirSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { buildBeats, DURATION_IN_FRAMES, FPS } from '../src/timeline/beats.ts';
+import { FPS } from '../src/timeline/core.ts';
+import { timelineFor } from '../src/archetypes/registry.ts';
+import { validateScene } from '../src/schema/scene.ts';
 import { SAMPLE_RATE, renderSound, softClip, toWav } from '../src/audio/synth.ts';
-
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+import { ROOT, selectScenes } from './lib/scenes.mjs';
 
 /** Extra tail so the final stinger's ring is not cut off mid-decay. */
 const TAIL_SECONDS = 0.4;
 
-function buildTrack() {
-  const beats = buildBeats();
-  const total = Math.ceil((DURATION_IN_FRAMES / FPS + TAIL_SECONDS) * SAMPLE_RATE);
+function buildTrack(timeline) {
+  const beats = timeline.buildBeats();
+  const duration = timeline.durationInFrames;
+  const total = Math.ceil((duration / FPS + TAIL_SECONDS) * SAMPLE_RATE);
   const buf = new Float32Array(total);
 
   let placed = 0;
@@ -31,12 +34,12 @@ function buildTrack() {
     const at = Math.round((beat.frame / FPS) * SAMPLE_RATE);
     /*
      * Keep only beats that START inside the video. Two kinds get dropped:
-     * negative ones, because the reel opens mid-phrase; and ones past the last
-     * frame, because buildBeats deliberately runs a cycle long. The TAIL_SECONDS
+     * negative ones, because a reel opens mid-phrase; and ones past the last
+     * frame, because timelines deliberately run a cycle long. The TAIL_SECONDS
      * of buffer exists so the last KEPT sound can ring out, not to admit sounds
      * the viewer will never reach.
      */
-    if (at < 0 || beat.frame >= DURATION_IN_FRAMES) {
+    if (at < 0 || beat.frame >= duration) {
       dropped++;
       continue;
     }
@@ -50,32 +53,25 @@ function buildTrack() {
   let peak = 0;
   for (const s of buf) peak = Math.max(peak, Math.abs(s));
 
-  return { buf, placed, dropped, peak, beats };
+  const kinds = beats.reduce((acc, b) => ({ ...acc, [b.kind]: (acc[b.kind] ?? 0) + 1 }), {});
+  console.log(
+    `  ${placed} sounds placed, ${dropped} outside the render window` +
+      `\n  ${(buf.length / SAMPLE_RATE).toFixed(2)}s @ ${SAMPLE_RATE}Hz mono, peak ${peak.toFixed(3)}` +
+      `\n  ${Object.entries(kinds)
+        .map(([k, v]) => `${k}:${v}`)
+        .join('  ')}`,
+  );
+
+  return toWav(buf);
 }
-
-const slugs =
-  process.argv.slice(2).length > 0
-    ? process.argv.slice(2)
-    : readdirSync(join(ROOT, 'scenes'))
-        .filter((f) => f.endsWith('.json'))
-        .map((f) => JSON.parse(readFileSync(join(ROOT, 'scenes', f), 'utf8')).slug);
-
-const { buf, placed, dropped, peak, beats } = buildTrack();
-const wav = toWav(buf);
 
 mkdirSync(join(ROOT, 'public', 'audio'), { recursive: true });
 
-for (const slug of slugs) {
-  const out = join(ROOT, 'public', 'audio', `${slug}.wav`);
-  writeFileSync(out, wav);
-  console.log(`  wrote public/audio/${slug}.wav`);
+for (const { raw } of selectScenes()) {
+  const scene = validateScene(raw);
+  console.log(`\n  ${scene.slug} (${scene.stage.kind})`);
+  const wav = buildTrack(timelineFor(scene.stage));
+  writeFileSync(join(ROOT, 'public', 'audio', `${scene.slug}.wav`), wav);
+  console.log(`  wrote public/audio/${scene.slug}.wav`);
 }
-
-const kinds = beats.reduce((acc, b) => ({ ...acc, [b.kind]: (acc[b.kind] ?? 0) + 1 }), {});
-console.log(
-  `\n  ${placed} sounds placed, ${dropped} outside the render window` +
-    `\n  ${(buf.length / SAMPLE_RATE).toFixed(2)}s @ ${SAMPLE_RATE}Hz mono, peak ${peak.toFixed(3)}` +
-    `\n  ${Object.entries(kinds)
-      .map(([k, v]) => `${k}:${v}`)
-      .join('  ')}`,
-);
+console.log('');

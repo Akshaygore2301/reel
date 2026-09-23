@@ -1,0 +1,46 @@
+{
+  "slug": "pagination",
+  "header": {
+    "stat": { "label": "FIRST ROW", "slow": "3.0s", "fast": "0.1s" },
+    "title": { "lead": "Paginate", "accent": "Your Queries" },
+    "subtitle": "why page one shows up before row ten thousand"
+  },
+  "stage": {
+    "kind": "splitCompare",
+    "source": { "label": "THE DATABASE", "sub": "finds matching rows one by one" },
+    "buffer": {
+      "label": "THE RESULT SET",
+      "sub": "waits for every single row",
+      "subOpen": "all 10,000 rows at once"
+    },
+    "slow": {
+      "title": "LOAD IT ALL",
+      "sub": "SELECT * with no LIMIT",
+      "waitLabel": "still fetching"
+    },
+    "fast": { "title": "PAGINATED", "sub": "first 50 rows, then the next" },
+    "counterLabel": "ROWS SHOWN",
+    "payloads": [
+      "the query matched ten thousand orders and the app waited for every one of them to load into memory before it drew a single row on the screen for you",
+      "with a limit and a cursor the first page of fifty rows comes back right away and the next page is only fetched when you actually scroll down to it"
+    ],
+    "stat": {
+      "firstLabel": "FIRST ROW",
+      "firstBefore": "3.0s",
+      "firstAfter": "0.1s",
+      "lastLabel": "ALL ROWS",
+      "lastText": "3.0s = 3.0s"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 10 }, "text": "why does this table take ages to appear?" },
+    { "at": { "cycle": 0, "on": "dump" }, "text": "every row was loaded before any was drawn." },
+    { "at": { "cycle": 1, "token": 6 }, "text": "pagination fetches one small page at a time." },
+    { "at": { "cycle": 1, "token": 20 }, "text": "you see page one while the rest can wait." }
+  ],
+  "credits": {
+    "lead": "PAGINATION",
+    "tail": "= fetch a page, not the whole table",
+    "tags": ["POSTGRES", "GRAPHQL", "STRIPE API", "DJANGO"]
+  }
+}

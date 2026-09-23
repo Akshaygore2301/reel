@@ -41,7 +41,7 @@ export function withAlpha(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-/** Frame size only. All timing lives in src/timeline/beats.ts — don't duplicate it here. */
+/** Frame size only. All timing lives in each archetype's timeline.ts; don't duplicate it here. */
 export const VIDEO = {
   width: 720,
   height: 1280,

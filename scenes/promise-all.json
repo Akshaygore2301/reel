@@ -1,0 +1,39 @@
+{
+  "slug": "promise-all",
+  "header": {
+    "stat": { "label": "PAGE DATA", "slow": "1.2s", "fast": "480ms" },
+    "title": { "lead": "Parallel", "accent": "Awaits" },
+    "subtitle": "when calls don't need each other's answers"
+  },
+  "stage": {
+    "kind": "fanOut",
+    "clockLabel": "ELAPSED",
+    "totalMs": 1200,
+    "calls": [
+      { "name": "GET /user", "cost": "240ms", "weight": 20 },
+      { "name": "GET /orders", "cost": "480ms", "weight": 40 },
+      { "name": "GET /cart", "cost": "180ms", "weight": 15 },
+      { "name": "GET /recs", "cost": "300ms", "weight": 25 }
+    ],
+    "seq": { "title": "AWAIT EACH", "sub": "one call, then the next" },
+    "par": { "title": "PROMISE.ALL", "sub": "fire them all, wait once", "join": "ALL RESOLVED" },
+    "stat": {
+      "firstLabel": "PAGE DATA",
+      "firstBefore": "1.2s",
+      "firstAfter": "480ms",
+      "lastLabel": "SLOWEST CALL",
+      "lastText": "480ms = 480ms"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 5 }, "text": "four calls, and none needs the others." },
+    { "at": { "cycle": 0, "on": "join" }, "text": "fired together, they're already done." },
+    { "at": { "cycle": 1, "token": 3 }, "text": "in turn you pay the sum of every call." },
+    { "at": { "cycle": 1, "on": "done" }, "text": "at once, you only wait for the slowest." }
+  ],
+  "credits": {
+    "lead": "FAN-OUT",
+    "tail": "= independent work, started together",
+    "tags": ["PROMISE.ALL", "ASYNCIO", "GOROUTINES", "COMPLETABLE"]
+  }
+}

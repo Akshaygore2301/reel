@@ -9,7 +9,7 @@
  *
  * ---------------------------------------------------------------------------
  * CONSTRAINT: importable by bare Node via `--experimental-strip-types`, same as
- * timeline/beats.ts. Zero imports, type-only annotations.
+ * the timeline modules. Zero imports, type-only annotations.
  * ---------------------------------------------------------------------------
  */
 

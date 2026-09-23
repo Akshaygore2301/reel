@@ -1,0 +1,45 @@
+{
+  "slug": "ci-cache",
+  "header": {
+    "stat": { "label": "CI RUN", "slow": "10 min", "fast": "4.6 min" },
+    "title": { "lead": "Cache Your", "accent": "CI Installs" },
+    "subtitle": "where ten minutes of CI actually goes"
+  },
+  "stage": {
+    "kind": "pipeline",
+    "unitLabel": "STEPS DONE",
+    "clockLabel": "ELAPSED",
+    "totalMs": 600000,
+    "stages": [
+      { "name": "CHECKOUT", "detail": "clones the repo", "cost": "30s", "weight": 5 },
+      {
+        "name": "INSTALL DEPS",
+        "detail": "downloads every dependency",
+        "cost": "6 min",
+        "weight": 60,
+        "bottleneck": true
+      },
+      { "name": "BUILD", "detail": "compiles the app", "cost": "2 min", "weight": 20 },
+      { "name": "TEST", "detail": "runs the test suite", "cost": "90s", "weight": 15 }
+    ],
+    "fix": { "weight": 6, "cost": "36s", "label": "CACHE HIT" },
+    "stat": {
+      "firstLabel": "CI RUN",
+      "firstBefore": "10 min",
+      "firstAfter": "4.6 min",
+      "lastLabel": "LOCKFILE EDIT",
+      "lastText": "full install"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 5 }, "text": "why does every CI run take ten minutes?" },
+    { "at": { "cycle": 0, "token": 20 }, "text": "most of it is downloading the same packages." },
+    { "at": { "cycle": 1, "token": 3 }, "text": "cache them, keyed by the lockfile." },
+    { "at": { "cycle": 1, "on": "done" }, "text": "same pipeline, under half the time." }
+  ],
+  "credits": {
+    "lead": "DEP CACHING",
+    "tail": "= restore packages, don't refetch them",
+    "tags": ["GH ACTIONS", "CIRCLECI", "GITLAB CI", "BUILDKITE"]
+  }
+}

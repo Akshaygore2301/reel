@@ -1,0 +1,46 @@
+{
+  "slug": "db-index",
+  "header": {
+    "stat": { "label": "QUERY TIME", "slow": "900ms", "fast": "225ms" },
+    "title": { "lead": "Database", "accent": "Indexes" },
+    "subtitle": "where a slow query actually spends its time"
+  },
+  "stage": {
+    "kind": "pipeline",
+    "unitLabel": "STEPS DONE",
+    "clockLabel": "QUERY TIME",
+    "totalMs": 900,
+    "stages": [
+      { "name": "PARSE", "detail": "reads the sql text", "cost": "36ms", "weight": 4 },
+      { "name": "PLAN", "detail": "picks how to find rows", "cost": "54ms", "weight": 6 },
+      {
+        "name": "SEQ SCAN",
+        "detail": "reads every row on disk",
+        "cost": "720ms",
+        "weight": 80,
+        "bottleneck": true
+      },
+      { "name": "SORT", "detail": "orders what matched", "cost": "54ms", "weight": 6 },
+      { "name": "RETURN", "detail": "sends rows to the app", "cost": "36ms", "weight": 4 }
+    ],
+    "fix": { "weight": 5, "cost": "45ms", "label": "INDEX SEEK" },
+    "stat": {
+      "firstLabel": "QUERY TIME",
+      "firstBefore": "900ms",
+      "firstAfter": "225ms",
+      "lastLabel": "INSERTS",
+      "lastText": "writes pay more"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 5 }, "text": "why is this one query so slow?" },
+    { "at": { "cycle": 0, "token": 20 }, "text": "it read every row to find a handful." },
+    { "at": { "cycle": 1, "token": 3 }, "text": "an index jumps straight to the rows." },
+    { "at": { "cycle": 1, "on": "done" }, "text": "same query, a quarter of the time." }
+  ],
+  "credits": {
+    "lead": "B-TREE INDEX",
+    "tail": "= find rows without reading them all",
+    "tags": ["POSTGRES", "MYSQL", "SQLITE", "MONGODB"]
+  }
+}

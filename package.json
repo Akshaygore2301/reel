@@ -3,18 +3,19 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --experimental-strip-types --no-warnings=ExperimentalWarning --test tests/*.test.mjs",
     "studio": "remotion studio src/index.ts",
     "typecheck": "tsc --noEmit",
     "validate": "node --experimental-strip-types scripts/validate.mjs",
     "audio": "node --experimental-strip-types scripts/build-audio.mjs",
     "verify": "node --experimental-strip-types scripts/verify-sync.mjs",
-    "render": "node --experimental-strip-types scripts/render.mjs"
+    "render": "node --experimental-strip-types scripts/render.mjs",
+    "reel": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/reel.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Code-rendered tech explainer reels, authorable by any AI agent through the reel CLI.",
   "private": "true",
   "type": "module",
   "dependencies": {
@@ -30,5 +31,8 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "typescript": "^5.9.3"
+  },
+  "bin": {
+    "reel": "scripts/reel.mjs"
   }
 }

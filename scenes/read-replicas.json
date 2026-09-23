@@ -1,0 +1,45 @@
+{
+  "slug": "read-replicas",
+  "header": {
+    "stat": { "label": "DOWNTIME", "slow": "~10 min", "fast": "0s" },
+    "title": { "lead": "Bigger DB vs", "accent": "Read Replicas" },
+    "subtitle": "when one database can't keep up with reads"
+  },
+  "stage": {
+    "kind": "scaleOut",
+    "source": { "label": "THE APP", "sub": "one read query every 100ms" },
+    "counterLabel": "READS SERVED",
+    "up": {
+      "title": "BIGGER DB",
+      "sub": "resize the primary, then restart",
+      "unit": "db.large",
+      "unitAfter": "db.4xlarge",
+      "offlineLabel": "resizing"
+    },
+    "out": {
+      "title": "READ REPLICAS",
+      "sub": "copy the data, spread the reads",
+      "unit": "db.large",
+      "router": "PROXY",
+      "spawnLabel": "+REPLICA"
+    },
+    "stat": {
+      "firstLabel": "DOWNTIME",
+      "firstBefore": "~10 min",
+      "firstAfter": "0s",
+      "lastLabel": "WRITES",
+      "lastText": "still 1 primary"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 5 }, "text": "your database is drowning in reads." },
+    { "at": { "cycle": 0, "on": "offline" }, "text": "a bigger instance means a restart." },
+    { "at": { "cycle": 1, "on": "spawn" }, "text": "a replica copies the data and takes reads." },
+    { "at": { "cycle": 1, "on": "online" }, "text": "reads spread out, nothing goes down." }
+  ],
+  "credits": {
+    "lead": "READ REPLICAS",
+    "tail": "= copies that serve reads, not writes",
+    "tags": ["POSTGRES", "MYSQL", "AURORA", "PLANETSCALE"]
+  }
+}

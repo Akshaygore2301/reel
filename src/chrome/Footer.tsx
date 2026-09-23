@@ -2,7 +2,7 @@ import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
 import { FONT } from '../brand/fonts';
 import { COLOR, LAYOUT, MONO_FEATURES, TRACK, TYPE, withAlpha } from '../brand/tokens';
-import { stateAt } from '../timeline/beats';
+import { useTimeline, useTimelineState } from '../timeline/context';
 import { captionAt } from '../timeline/anchors';
 import type { Scene } from '../schema/scene';
 
@@ -18,8 +18,9 @@ const SWAP_FRAMES = 5;
  */
 export const Footer: React.FC<{ scene: Scene }> = ({ scene }) => {
   const frame = useCurrentFrame();
-  const state = stateAt(frame);
-  const caption = captionAt(scene.captions, frame);
+  const timeline = useTimeline();
+  const state = useTimelineState(timeline);
+  const caption = captionAt(timeline, scene.captions, frame);
 
   // Swap in with a small rise; fade out at the tail for a seamless loop.
   const entry = caption

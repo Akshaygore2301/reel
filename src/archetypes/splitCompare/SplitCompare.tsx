@@ -1,27 +1,31 @@
 import React from 'react';
-import { useCurrentFrame } from 'remotion';
-import { FONT } from '../brand/fonts';
-import { COLOR, MONO_FEATURES, TRACK, TYPE, VIDEO } from '../brand/tokens';
-import { TICK_STRIDE, TIMING, stateAt } from '../timeline/beats';
+import { FONT } from '../../brand/fonts';
+import { COLOR, VIDEO } from '../../brand/tokens';
+import { useTimelineState } from '../../timeline/context';
+import { TICK_STRIDE, TIMING, splitCompareTimeline } from './timeline';
 import {
-  CAGE,
   CAGE_LABEL,
   COUNTER,
   PANEL,
   PANEL_TITLE,
+  STAT,
   SOURCE_LABEL,
   faceBox,
   mirrorX,
-} from '../primitives/geometry';
-import { BufferCage } from '../primitives/BufferCage';
-import { Conveyor } from '../primitives/Conveyor';
-import { Counter } from '../primitives/Counter';
-import { Machine } from '../primitives/Machine';
-import { Panel } from '../primitives/Panel';
-import { StatDelta } from '../primitives/StatDelta';
-import { Timer } from '../primitives/Timer';
-import { TokenText } from '../primitives/TokenText';
-import type { SplitCompare as SplitCompareStage } from '../schema/scene';
+} from '../../primitives/geometry';
+import { BufferCage } from '../../primitives/BufferCage';
+import { Conveyor } from '../../primitives/Conveyor';
+import { Counter } from '../../primitives/Counter';
+import { LabelBlock, TitleBlock } from '../../primitives/Labels';
+import { Machine } from '../../primitives/Machine';
+import { Panel } from '../../primitives/Panel';
+import { StatDelta } from '../../primitives/StatDelta';
+import { Timer } from '../../primitives/Timer';
+import { TokenText } from '../../primitives/TokenText';
+import type { SplitCompare as SplitCompareStage } from './schema';
+
+/** Centre of the slow panel's title; the fast one mirrors it. */
+const TITLE_CX = (PANEL.outerTopX + PANEL.innerX) / 2;
 
 /** Frames a unit takes to travel a belt end to end. ~4 units visible in transit. */
 const TRAVEL = 12;
@@ -34,8 +38,7 @@ const TRAVEL = 12;
  * timeline.
  */
 export const SplitCompare: React.FC<{ stage: SplitCompareStage }> = ({ stage }) => {
-  const frame = useCurrentFrame();
-  const s = stateAt(frame);
+  const s = useTimelineState(splitCompareTimeline);
 
   const words = React.useMemo(
     () => stage.payloads.map((p) => p.trim().split(/\s+/)),
@@ -124,7 +127,6 @@ export const SplitCompare: React.FC<{ stage: SplitCompareStage }> = ({ stage }) 
         label={stage.source.label}
         sub={stage.source.sub}
         color={COLOR.machine}
-        align="center"
       />
       <LabelBlock
         cx={CAGE_LABEL.cx}
@@ -132,7 +134,6 @@ export const SplitCompare: React.FC<{ stage: SplitCompareStage }> = ({ stage }) 
         label={stage.buffer.label}
         sub={s.dumpProgress > 0.35 ? stage.buffer.subOpen : stage.buffer.sub}
         color={COLOR.slow}
-        align="center"
       />
 
       {/* ---- slow screen: a spinner and a clock, nothing else until the dump ---- */}
@@ -164,104 +165,17 @@ export const SplitCompare: React.FC<{ stage: SplitCompareStage }> = ({ stage }) 
         box={rightFace}
       />
 
-      <StatDelta stat={stage.stat} reveal={s.statReveal} />
+      <StatDelta stat={stage.stat} reveal={s.statReveal} box={STAT} />
 
       {/* ---- panel titles ---- */}
-      <PanelTitle side="left" title={stage.slow.title} sub={stage.slow.sub} color={COLOR.slow} />
-      <PanelTitle side="right" title={stage.fast.title} sub={stage.fast.sub} color={COLOR.fast} />
+      <TitleBlock cx={TITLE_CX} y={PANEL_TITLE.y} title={stage.slow.title} sub={stage.slow.sub} color={COLOR.slow} />
+      <TitleBlock
+        cx={mirrorX(TITLE_CX)}
+        y={PANEL_TITLE.y}
+        title={stage.fast.title}
+        sub={stage.fast.sub}
+        color={COLOR.fast}
+      />
     </div>
   );
 };
-
-const LabelBlock: React.FC<{
-  cx: number;
-  y: number;
-  label: string;
-  sub: string;
-  color: string;
-  align: 'center';
-}> = ({ cx, y, label, sub, color }) => (
-  <div
-    style={{
-      position: 'absolute',
-      left: cx - 130,
-      top: y,
-      width: 260,
-      textAlign: 'center',
-    }}
-  >
-    <div
-      style={{
-        fontFamily: FONT.mono,
-        fontSize: TYPE.sectionLabel,
-        fontWeight: 700,
-        letterSpacing: TRACK.wide,
-        color,
-        ...MONO_FEATURES,
-      }}
-    >
-      {label.toUpperCase()}
-    </div>
-    <div
-      style={{
-        marginTop: 4,
-        fontFamily: FONT.sans,
-        fontSize: TYPE.sectionSub + 2,
-        fontWeight: 400,
-        color: COLOR.inkDim,
-      }}
-    >
-      {sub}
-    </div>
-  </div>
-);
-
-const PanelTitle: React.FC<{
-  side: 'left' | 'right';
-  title: string;
-  sub: string;
-  color: string;
-}> = ({ side, title, sub, color }) => {
-  const cx =
-    side === 'left'
-      ? (PANEL.outerTopX + PANEL.innerX) / 2
-      : mirrorX((PANEL.outerTopX + PANEL.innerX) / 2);
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: cx - 170,
-        top: PANEL_TITLE.y,
-        width: 340,
-        textAlign: 'center',
-      }}
-    >
-      <div
-        style={{
-          fontFamily: FONT.mono,
-          fontSize: TYPE.sectionLabel + 2,
-          fontWeight: 700,
-          letterSpacing: TRACK.wide,
-          color,
-          ...MONO_FEATURES,
-        }}
-      >
-        {title.toUpperCase()}
-      </div>
-      <div
-        style={{
-          marginTop: 5,
-          fontFamily: FONT.sans,
-          fontSize: TYPE.sectionSub + 2,
-          fontWeight: 400,
-          color: COLOR.inkDim,
-        }}
-      >
-        {sub}
-      </div>
-    </div>
-  );
-};
-
-/** Referenced by geometry consumers; keeps the cage constant honest. */
-export const CAGE_CAPACITY = CAGE.rows;

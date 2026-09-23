@@ -3,7 +3,9 @@ import { AbsoluteFill, Audio, staticFile } from 'remotion';
 import { Frame } from './chrome/Frame';
 import { Header } from './chrome/Header';
 import { Footer } from './chrome/Footer';
-import { SplitCompare } from './archetypes/SplitCompare';
+import { StageView } from './archetypes/components';
+import { timelineFor } from './archetypes/registry';
+import { TimelineProvider } from './timeline/context';
 import type { Scene } from './schema/scene';
 
 /**
@@ -11,21 +13,23 @@ import type { Scene } from './schema/scene';
  * generated audio track.
  *
  * The audio WAV is built offline by scripts/build-audio.mjs from the same
- * timeline module the visuals read. If it is missing the video still renders
+ * archetype timeline the visuals read. If it is missing the video still renders
  * silently, which keeps `remotion studio` usable without running the build.
  */
 export const Reel: React.FC<{ scene: Scene; audio?: boolean }> = ({ scene, audio = true }) => {
   return (
-    <Frame>
-      <Header scene={scene} />
+    <TimelineProvider timeline={timelineFor(scene.stage)}>
+      <Frame>
+        <Header scene={scene} />
 
-      <AbsoluteFill>
-        {scene.stage.kind === 'splitCompare' && <SplitCompare stage={scene.stage} />}
-      </AbsoluteFill>
+        <AbsoluteFill>
+          <StageView stage={scene.stage} />
+        </AbsoluteFill>
 
-      <Footer scene={scene} />
+        <Footer scene={scene} />
 
-      {audio && <Audio src={staticFile(`audio/${scene.slug}.wav`)} />}
-    </Frame>
+        {audio && <Audio src={staticFile(`audio/${scene.slug}.wav`)} />}
+      </Frame>
+    </TimelineProvider>
   );
 };

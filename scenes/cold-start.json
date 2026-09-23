@@ -1,0 +1,45 @@
+{
+  "slug": "cold-start",
+  "header": {
+    "stat": { "label": "COLD REQUEST", "slow": "1.2s", "fast": "420ms" },
+    "title": { "lead": "Cold", "accent": "Starts" },
+    "subtitle": "where the first request's second goes"
+  },
+  "stage": {
+    "kind": "pipeline",
+    "unitLabel": "STAGES DONE",
+    "clockLabel": "ELAPSED",
+    "totalMs": 1200,
+    "stages": [
+      { "name": "GATEWAY", "detail": "routes to your function", "cost": "60ms", "weight": 5 },
+      {
+        "name": "COLD START",
+        "detail": "boots runtime, loads code",
+        "cost": "840ms",
+        "weight": 70,
+        "bottleneck": true
+      },
+      { "name": "HANDLER", "detail": "your code actually runs", "cost": "180ms", "weight": 15 },
+      { "name": "RESPOND", "detail": "serialise and send back", "cost": "120ms", "weight": 10 }
+    ],
+    "fix": { "weight": 5, "cost": "60ms", "label": "KEPT WARM" },
+    "stat": {
+      "firstLabel": "RESPONSE",
+      "firstBefore": "1.2s",
+      "firstAfter": "420ms",
+      "lastLabel": "YOUR CODE",
+      "lastText": "180ms = 180ms"
+    }
+  },
+  "captions": [
+    { "at": { "cycle": 0, "token": 5 }, "text": "why is the first request so slow?" },
+    { "at": { "cycle": 0, "token": 20 }, "text": "most of it is booting, not your code." },
+    { "at": { "cycle": 1, "token": 3 }, "text": "keep one instance warm and skip the boot." },
+    { "at": { "cycle": 1, "on": "done" }, "text": "same request, about a third of the time." }
+  ],
+  "credits": {
+    "lead": "COLD START",
+    "tail": "= boot cost paid by the first request",
+    "tags": ["AWS LAMBDA", "CLOUD RUN", "VERCEL", "CLOUDFLARE"]
+  }
+}
